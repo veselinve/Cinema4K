@@ -1,0 +1,30 @@
+# Large binary executables (>100MB exceeds standard GitHub file limit)
+# (Users obtain mpv.exe via updater.bat or GitHub Release assets)
+mpv.exe
+mpv.com
+d3dcompiler_*.dll
+youtube-dl.exe
+yt-dlp.exe
+
+# Temporary archives & updater downloads
+*.7z
+7z/
+*.zip
+
+# Logs, caches & temporary files
+*.log
+*.tmp
+*.bak
+*.pyc
+__pycache__/
+sub_test.log
+test_mpv.log
+
+# User playback state
+watch_later/
+mpv/watch_later/
+
+# OS metadata
+Thumbs.db
+Desktop.ini
+.DS_Store
