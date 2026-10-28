@@ -199,10 +199,10 @@ MPV-Made-Easy/
 ### Cinema4K™ Video Shaders Suite
 Copyright (c) 2026. All rights reserved.
 
-The **Cinema4K™** studio shaders (*Cinema4K Velvet Cinema Master*, *Cinema4K Ultra Dynamic Punch*, *Cinema4K 3-Band Master*, and *Cinema4K AI Neural*) are licensed under a **Dual Licensing Model** (see the full text in [LICENSE](./LICENSE)):
+The **Cinema4K™** studio shaders (*Cinema4K Velvet Cinema Master*, *Cinema4K Ultra Dynamic Punch*, *Cinema4K 3-Band Master*, and *Cinema4K AI Neural*) are licensed under a **Dual Licensing Model** (see the local repository [LICENSE](LICENSE)):
 
 * **1. Personal & Non-Commercial Use (100% Free)**:
-  * Licensed under the **[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/)**.
+  * Licensed under the **[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0)** ([SPDX Registry](https://spdx.org/licenses/PolyForm-Noncommercial-1.0.0.html)).
   * Free for individual users, film lovers, students, and home cinema enthusiasts to download, run, and evaluate.
 * **2. Commercial Use (Strictly Prohibited Without Paid License)**:
   * ANY commercial deployment is strictly prohibited without an express written **Commercial License Agreement** and payment of royalties.
