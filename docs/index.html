@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cinema4K™ Interactive Comparison Slider</title>
+  <title>Cinema4K™ Studio Master - 100% Lossless Interactive Comparison</title>
   <style>
     :root {
-      --bg: #0b0d11;
-      --card: #151821;
-      --border: #222736;
+      --bg: #090b0e;
+      --card: #131720;
+      --border: #212836;
       --accent: #10b981;
-      --accent-cyan: #38bdf8;
-      --text: #f1f5f9;
+      --cyan: #38bdf8;
+      --text: #f8fafc;
       --subtext: #94a3b8;
+      --slider-pos: 50%;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body {
@@ -23,19 +24,19 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px;
+      padding: 24px 16px 40px;
     }
     header {
       text-align: center;
-      max-width: 900px;
+      max-width: 960px;
       margin-bottom: 20px;
     }
     h1 {
-      font-size: 28px;
-      font-weight: 700;
+      font-size: 30px;
+      font-weight: 800;
       letter-spacing: -0.5px;
       margin-bottom: 8px;
-      background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan));
+      background: linear-gradient(135deg, #ffffff 40%, var(--cyan));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -44,12 +45,15 @@
       font-size: 15px;
       line-height: 1.5;
     }
-    .controls {
+    .toolbar {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
       justify-content: center;
-      margin-bottom: 18px;
+      align-items: center;
+      margin-bottom: 20px;
+      max-width: 1200px;
+      width: 100%;
     }
     .btn {
       background: var(--card);
@@ -63,31 +67,37 @@
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
     .btn:hover {
-      border-color: var(--accent-cyan);
-      background: #1c2230;
+      border-color: var(--cyan);
+      background: #1b2230;
     }
     .btn.active {
       background: #064e3b;
       border-color: var(--accent);
       color: #34d399;
-      box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.35);
     }
-    .comparison-container {
+    .zoom-btn {
+      background: #1a202c;
+      border-color: #334155;
+    }
+    
+    /* Comparison Box */
+    .comparison-wrapper {
       position: relative;
       width: 100%;
-      max-width: 1200px;
+      max-width: 1400px;
       aspect-ratio: 1920 / 1040;
       background: #000;
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--border);
-      box-shadow: 0 12px 36px rgba(0,0,0,0.6);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.8);
       cursor: ew-resize;
     }
-    .img-layer {
+    .layer {
       position: absolute;
       top: 0;
       left: 0;
@@ -95,202 +105,244 @@
       height: 100%;
       object-fit: cover;
       pointer-events: none;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
     }
-    .img-before {
+    .layer-before {
       z-index: 1;
     }
-    .img-after-wrapper {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 50%;
-      overflow: hidden;
+    .layer-after {
       z-index: 2;
+      clip-path: inset(0 calc(100% - var(--slider-pos)) 0 0);
     }
-    .img-after {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 1200px;
-      height: 100%;
-      max-width: none;
-      object-fit: cover;
-    }
-    .slider-handle {
+    
+    /* Draggable Divider */
+    .slider-divider {
       position: absolute;
       top: 0;
       bottom: 0;
-      left: 50%;
+      left: var(--slider-pos);
       width: 4px;
-      background: var(--accent-cyan);
+      background: var(--cyan);
       z-index: 3;
       transform: translateX(-50%);
       pointer-events: none;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.9);
     }
-    .handle-circle {
+    .slider-handle {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 38px;
-      height: 38px;
+      width: 44px;
+      height: 44px;
       background: #0284c7;
       border: 3px solid #ffffff;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-size: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: bold;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+      pointer-events: auto;
+      cursor: grab;
     }
+    .slider-handle:active {
+      cursor: grabbing;
+      background: #0369a1;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+    
+    /* Overlay Floating Pills */
     .pill {
       position: absolute;
-      top: 16px;
-      padding: 8px 14px;
+      top: 18px;
+      padding: 8px 16px;
       border-radius: 6px;
       font-size: 13px;
       font-weight: 700;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       z-index: 4;
       pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
     .pill-left {
-      left: 16px;
-      background: rgba(6, 78, 59, 0.85);
+      left: 18px;
+      background: rgba(6, 78, 59, 0.9);
       border: 1px solid var(--accent);
       color: #34d399;
     }
     .pill-right {
-      right: 16px;
-      background: rgba(15, 23, 42, 0.85);
+      right: 18px;
+      background: rgba(15, 23, 42, 0.9);
       border: 1px solid #475569;
       color: #e2e8f0;
     }
-    .instructions {
-      margin-top: 16px;
+    
+    .status-bar {
+      margin-top: 18px;
       color: var(--subtext);
       font-size: 14px;
       display: flex;
-      gap: 16px;
+      gap: 20px;
       align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
     }
-    .repo-link {
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: #1e293b;
+      border-radius: 4px;
+      color: #38bdf8;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .back-btn {
       margin-top: 24px;
-      color: var(--accent-cyan);
+      color: var(--cyan);
       text-decoration: none;
       font-weight: 600;
       font-size: 15px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
     }
-    .repo-link:hover { text-decoration: underline; }
+    .back-btn:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Cinema4K™ Interactive Comparison Slider</h1>
-    <p class="desc">Drag the slider horizontally to compare <strong>Original Raw 1080p</strong> against <strong>Cinema4K™ Studio Master Shaders</strong> on real live-action film footage (Great Teacher Onizuka 1999 Master).</p>
+    <h1>Cinema4K™ 100% Lossless Interactive Comparison</h1>
+    <p class="desc">
+      Drag the vertical slider across the full 1080p frame with your mouse to inspect pristine before/after acutance without compression loss.
+    </p>
   </header>
 
-  <div class="controls">
-    <button class="btn active" onclick="switchPreset('f5', this)">⭐ Cinema4K Velvet Master (F5)</button>
-    <button class="btn" onclick="switchPreset('f6', this)">🔥 Ultra Dynamic Punch (F6)</button>
-    <button class="btn" onclick="switchPreset('f4', this)">Classic 3-Band Master (F4)</button>
+  <div class="toolbar">
+    <button class="btn active" onclick="setPreset('f5', this)">⭐ Velvet Cinema Master (F5)</button>
+    <button class="btn" onclick="setPreset('f6', this)">🔥 Ultra Dynamic Punch (F6)</button>
+    <button class="btn" onclick="setPreset('f4', this)">Classic 3-Band Master (F4)</button>
+    <button class="btn zoom-btn" id="zoomBtn" onclick="toggleZoom()">🔍 Zoom: 1x (Fit)</button>
   </div>
 
-  <div class="comparison-container" id="container">
-    <!-- Unprocessed Raw Image (Base Layer) -->
-    <img src="demo/raw.jpg" class="img-layer img-before" id="imgBefore" alt="Raw 1080p">
+  <div class="comparison-wrapper" id="wrapper">
+    <!-- Base Layer (RAW 1080p) -->
+    <img src="demo/raw.png" class="layer layer-before" alt="Original Uncompressed 1080p">
 
-    <!-- Processed Image (Clipped Overlay Layer) -->
-    <div class="img-after-wrapper" id="afterWrapper">
-      <img src="demo/f5.jpg" class="img-layer img-after" id="imgAfter" alt="Cinema4K Processed">
+    <!-- Top Overlay Layer (Cinema4K Processed) -->
+    <img src="demo/f5.png" class="layer layer-after" id="topLayer" alt="Cinema4K Processed">
+
+    <!-- Draggable Divider Line & Handle -->
+    <div class="slider-divider">
+      <div class="slider-handle" id="handle">◄ ►</div>
     </div>
 
-    <!-- Draggable Divider Line -->
-    <div class="slider-handle" id="sliderHandle">
-      <div class="handle-circle">◄ ►</div>
-    </div>
-
-    <!-- Labels -->
-    <div class="pill pill-left" id="activeLabel">CINEMA4K™ VELVET MASTER (F5)</div>
-    <div class="pill pill-right">RAW 1080p (BYPASS)</div>
+    <!-- Live Status Pills -->
+    <div class="pill pill-left" id="activeTitle">CINEMA4K™ VELVET MASTER (F5)</div>
+    <div class="pill pill-right">RAW 1080p STREAM (BYPASS)</div>
   </div>
 
-  <div class="instructions">
-    <span>💡 Click or drag anywhere across the image to reveal full Before / After</span>
+  <div class="status-bar">
+    <span>🖱️ <strong>Click or Drag:</strong> Move slider left / right across the frame</span>
+    <span>⌨️ <strong>Hotkeys:</strong> Left/Right arrows to slide, keys 1/2/3 to switch models</span>
+    <span class="badge">100% BIT-EXACT LOSSLESS PNG</span>
   </div>
 
-  <a class="repo-link" href="https://github.com/veselinve/Cinema4K">
-    ← Back to GitHub Repository (Cinema4K)
+  <a class="back-btn" href="https://github.com/veselinve/Cinema4K">
+    ← Return to Cinema4K GitHub Repository
   </a>
 
   <script>
-    const container = document.getElementById('container');
-    const afterWrapper = document.getElementById('afterWrapper');
-    const sliderHandle = document.getElementById('sliderHandle');
-    const imgAfter = document.getElementById('imgAfter');
-    const activeLabel = document.getElementById('activeLabel');
+    const wrapper = document.getElementById('wrapper');
+    const topLayer = document.getElementById('topLayer');
+    const handle = document.getElementById('handle');
+    const activeTitle = document.getElementById('activeTitle');
+    const zoomBtn = document.getElementById('zoomBtn');
 
-    let isDragging = false;
+    let isDown = false;
+    let isZoomed = false;
 
-    function updateSize() {
-      const rect = container.getBoundingClientRect();
-      imgAfter.style.width = rect.width + 'px';
-    }
-    window.addEventListener('resize', updateSize);
-    updateSize();
-
-    function setPosition(xPos) {
-      const rect = container.getBoundingClientRect();
-      let percent = ((xPos - rect.left) / rect.width) * 100;
-      if (percent < 0) percent = 0;
-      if (percent > 100) percent = 100;
-
-      afterWrapper.style.width = percent + '%';
-      sliderHandle.style.left = percent + '%';
+    function updateSlider(clientX) {
+      const rect = wrapper.getBoundingClientRect();
+      let pos = ((clientX - rect.left) / rect.width) * 100;
+      if (pos < 0) pos = 0;
+      if (pos > 100) pos = 100;
+      document.documentElement.style.setProperty('--slider-pos', pos + '%');
     }
 
-    container.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      setPosition(e.clientX);
+    wrapper.addEventListener('mousedown', (e) => {
+      isDown = true;
+      updateSlider(e.clientX);
     });
 
-    window.addEventListener('mouseup', () => isDragging = false);
-
+    window.addEventListener('mouseup', () => isDown = false);
     window.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      setPosition(e.clientX);
+      if (!isDown) return;
+      updateSlider(e.clientX);
     });
 
-    // Touch support for smartphones & tablets
-    container.addEventListener('touchstart', (e) => {
-      isDragging = true;
-      setPosition(e.touches[0].clientX);
+    // Touch support (mobile & tablet)
+    wrapper.addEventListener('touchstart', (e) => {
+      isDown = true;
+      updateSlider(e.touches[0].clientX);
     });
-    window.addEventListener('touchend', () => isDragging = false);
+    window.addEventListener('touchend', () => isDown = false);
     window.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
-      setPosition(e.touches[0].clientX);
+      if (!isDown) return;
+      updateSlider(e.touches[0].clientX);
     });
 
-    function switchPreset(preset, btn) {
-      document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+    // Keyboard support
+    window.addEventListener('keydown', (e) => {
+      let current = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slider-pos')) || 50;
+      if (e.key === 'ArrowLeft') {
+        current = Math.max(0, current - 5);
+        document.documentElement.style.setProperty('--slider-pos', current + '%');
+      } else if (e.key === 'ArrowRight') {
+        current = Math.min(100, current + 5);
+        document.documentElement.style.setProperty('--slider-pos', current + '%');
+      } else if (e.key === '1') {
+        document.querySelectorAll('.btn')[0].click();
+      } else if (e.key === '2') {
+        document.querySelectorAll('.btn')[1].click();
+      } else if (e.key === '3') {
+        document.querySelectorAll('.btn')[2].click();
+      }
+    });
+
+    function setPreset(model, btn) {
+      document.querySelectorAll('.btn').forEach(b => {
+        if (!b.classList.contains('zoom-btn')) b.classList.remove('active');
+      });
       btn.classList.add('active');
 
-      imgAfter.src = 'demo/' + preset + '.jpg';
-      
-      const labels = {
+      topLayer.src = 'demo/' + model + '.png';
+
+      const titles = {
         'f5': 'CINEMA4K™ VELVET MASTER (F5)',
         'f6': 'CINEMA4K ULTRA DYNAMIC PUNCH (F6)',
         'f4': 'CINEMA4K 3-BAND MASTER (F4)'
       };
-      activeLabel.textContent = labels[preset] || 'CINEMA4K™ ACTIVE';
+      activeTitle.textContent = titles[model] || 'CINEMA4K™ ACTIVE';
+    }
+
+    function toggleZoom() {
+      isZoomed = !isZoomed;
+      if (isZoomed) {
+        wrapper.style.transform = 'scale(1.8)';
+        wrapper.style.transformOrigin = 'center 35%';
+        wrapper.style.transition = 'transform 0.3s ease';
+        zoomBtn.textContent = '🔍 Zoom: 2x (Active)';
+        zoomBtn.classList.add('active');
+      } else {
+        wrapper.style.transform = 'none';
+        zoomBtn.textContent = '🔍 Zoom: 1x (Fit)';
+        zoomBtn.classList.remove('active');
+      }
     }
   </script>
 </body>
