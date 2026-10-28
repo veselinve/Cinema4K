@@ -1,8 +1,8 @@
-# Cinema4K™ Shader License Agreement
+# Cinema4K™ Shader Suite - License Agreement
 
 **Copyright (c) 2026. All rights reserved.**
 
-The **Cinema4K™** shaders suite (including *Cinema4K Velvet Cinema Master*, *Cinema4K Ultra Dynamic Punch*, *Cinema4K 3-Band Master*, and *Cinema4K AI Neural*) is licensed under a **Dual Licensing Model**:
+The **Cinema4K™** video shaders suite (including *Cinema4K Velvet Cinema Master*, *Cinema4K Ultra Dynamic Punch*, *Cinema4K 3-Band Master*, and *Cinema4K AI Neural*) is licensed under the **PolyForm Noncommercial License 1.0.0** and a **Commercial Dual Licensing Model**:
 
 ---
 
@@ -11,7 +11,7 @@ The **Cinema4K™** shaders suite (including *Cinema4K Velvet Cinema Master*, *C
 Permission is hereby granted, free of charge, to any person obtaining a copy of the Cinema4K™ shader files to use, study, and run the software for **personal, non-commercial, non-profit, educational, and evaluation purposes**, subject to the following conditions:
 
 * The copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-* The software is provided "as is", without warranty of any kind.
+* The software is provided "as is", without warranty of any kind, express or implied.
 
 ---
 
@@ -29,5 +29,11 @@ Restricted commercial activities include, but are not limited to:
 
 ## 3. Commercial Licensing Inquiries
 
-To obtain a commercial license, partnership agreement, or enterprise deployment rights for **Cinema4K™**, please submit an inquiry via:
-* **GitHub Repository Issues / Discussions** or contact the repository owner directly.
+To obtain a commercial license, enterprise deployment rights, or OEM partnership agreement for **Cinema4K™**, please submit an inquiry via:
+* **GitHub Repository Issues / Discussions** or contact the author directly via your GitHub profile.
+
+---
+
+## 4. Third-Party Components
+* The bundled **MPV Player** is licensed separately under GNU GPLv2/GPLv3 (see [LICENSE-MPV.txt](LICENSE-MPV.txt)).
+* The bundled **Anime4K** shaders are developed by bloc97 under the MIT License.
