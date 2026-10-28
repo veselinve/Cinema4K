@@ -4,6 +4,7 @@
 [![Engine](https://img.shields.io/badge/Engine-gpu--next%20%7C%20libplacebo-blue.svg)](https://code.videolan.org/videolan/libplacebo)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6.svg?logo=windows)](https://microsoft.com/windows)
 [![License](https://img.shields.io/badge/Cinema4K%20License-PolyForm%20Noncommercial-blue.svg)](LICENSE.md)
+[![Interactive Comparison](https://img.shields.io/badge/Live%20Demo-Interactive%20Slider-00c853.svg?logo=googlechrome)](https://veselinve.github.io/Cinema4K)
 [![Shaders](https://img.shields.io/badge/Shaders-Cinema4K%E2%84%A2-orange.svg)](#-cinema4k-real-time-shaders)
 
 A fully configured, portable, high-performance **MPV** distribution designed to deliver the familiar, comfortable feel of **MPC-HC (Media Player Classic)** while leveraging the cutting-edge power of **`gpu-next`**, **libplacebo**, and **Cinema4K™ Studio Master Shaders**.
@@ -41,11 +42,12 @@ Engineered specifically for live-action films, TV series, and real-world compres
 
 ### 📸 Visual Comparisons & Quality Showcase
 
-#### 1. Real-Time Cinematic Acutance (50/50 Split Showcase)
-*Source: Great Teacher Onizuka - The Movie (1999) [1080p Master].*  
-**Left:** Raw compressed 1080p stream (`F7` Bypass).  
-**Right:** **Cinema4K Velvet Cinema Master (`F5`)** — organic acutance, sub-pixel edge refinement, and film texture without haloing or artificial over-sharpening:
-![Cinema4K GTO Split Showcase](docs/images/cinema4k_gto_split_cinematic.png)
+#### 1. Full-Screen Before & After Slider Animation
+*Smooth sliding comparison across the full 1080p frame (Great Teacher Onizuka 1999 Master).*  
+Watch the slider glide between **Raw 1080p Bypass** and **Cinema4K Velvet Cinema Master (`F5`)**:
+![Cinema4K Smooth Slider Animation](docs/images/cinema4k_gto_animated_slider.gif)
+
+> 🎮 **Live Interactive Web Slider**: You can manually drag the slider with your mouse or finger on the [Cinema4K Interactive Web Demo](https://veselinve.github.io/Cinema4K)!
 
 #### 2. Model Evolution & Metric Analysis (Raw vs. F4 vs. F5 vs. F6)
 Direct 4-way comparison across all Cinema4K™ modes on live-action cinema:
