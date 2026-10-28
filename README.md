@@ -1,5 +1,6 @@
 # MPV - Made Easy! (Ultimate Cinema Edition)
 
+[![Release](https://img.shields.io/github/v/release/veselinve/Cinema4K?logo=github&color=blue)](https://github.com/veselinve/Cinema4K/releases/latest)
 [![MPV Version](https://img.shields.io/badge/MPV-v0.41%2B-red.svg?logo=mpv)](https://mpv.io/)
 [![Engine](https://img.shields.io/badge/Engine-gpu--next%20%7C%20libplacebo-blue.svg)](https://code.videolan.org/videolan/libplacebo)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6.svg?logo=windows)](https://microsoft.com/windows)
@@ -154,7 +155,9 @@ Direct 4-way comparison across all Cinema4K™ modes on live-action cinema:
 
 ## 📦 Installation & Setup
 
-1. **Download**: Download or clone this repository, or grab the latest release archive (`mpv-easy.zip`).
+1. **Download**: Grab the latest release package from the **[Official Releases](https://github.com/veselinve/Cinema4K/releases/latest)**:
+   * **[`mpv-easy.zip`](https://github.com/veselinve/Cinema4K/releases/download/v1.4.0/mpv-easy.zip)** (77.8 MB) — **Complete Portable Media Player** with `gpu-next`, MPC-HC controls, dialogue clarifier, and Cinema4K™ preconfigured.
+   * **[`Cinema4K_Masters_Bundle.zip`](https://github.com/veselinve/Cinema4K/releases/download/v1.4.0/Cinema4K_Masters_Bundle.zip)** (48 KB) — **Shaders Only** bundle for existing MPV setups.
 2. **Extract**: Unpack the files to your desired directory (e.g., `C:\Program Files\MPV\` or any portable drive).
 3. **Register File Associations** *(Optional)*:
    * Right-click `installer\mpv-install.bat` and select **"Run as administrator"**.
