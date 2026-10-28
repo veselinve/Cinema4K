@@ -42,15 +42,49 @@ Engineered specifically for live-action films, TV series, and real-world compres
 
 ### 📸 Visual Comparisons & Quality Showcase
 
-> 🎮 **Live Interactive Web Slider**: You can manually drag the slider across the full 1080p frame with your mouse or finger on the [Cinema4K Interactive Web Demo](https://veselinve.github.io/Cinema4K) *(100% Lossless PNG with live model switching and 2x zoom)*!
+<p align="center">
+  <a href="https://veselinve.github.io/Cinema4K/">
+    <img src="https://img.shields.io/badge/🎮%20Try%20Live%20Demo-Interactive%20Draggable%20Slider-00c853?style=for-the-badge&logo=googlechrome" alt="Interactive Web Demo">
+  </a>
+</p>
 
-#### 1. Real-Time Cinematic Acutance (Full 1080p Split Showcase)
-*Source: Great Teacher Onizuka - The Movie (1999) [1080p Master].*  
-**Left:** Raw compressed 1080p stream (`F7` Bypass).  
-**Right:** **Cinema4K Velvet Cinema Master (`F5`)** — organic acutance, sub-pixel edge refinement, and film texture without haloing or artificial over-sharpening:
+> 💡 **Interactive Web Slider**: Visit the **[Cinema4K Interactive Web Demo](https://veselinve.github.io/Cinema4K/)** to drag the slider horizontally with your mouse across the full 1080p frame, switch models, and inspect 2x zoom!
+
+---
+
+#### 1. Direct Full-Frame Comparison (Click to Switch Presets)
+*Toggle below to inspect the full 1080p frame at 100% lossless resolution directly in this README:*
+
+<details open>
+<summary><b>🎬 [Active View] Cinema4K Velvet Cinema Master (F5 - Flagship Natural)</b></summary>
+
+![Cinema4K Velvet Master](docs/demo/f5.png)
+</details>
+
+<details>
+<summary><b>📺 [Click to View] Raw 1080p Stream (F7 / Bypass - Unprocessed)</b></summary>
+
+![Raw 1080p Stream](docs/demo/raw.png)
+</details>
+
+<details>
+<summary><b>🔥 [Click to View] Cinema4K Ultra Dynamic Punch (F6 - High Contrast)</b></summary>
+
+![Cinema4K Ultra Dynamic Punch](docs/demo/f6.png)
+</details>
+
+<details>
+<summary><b>📐 [Click to View] Cinema4K 3-Band Master (F4 - Classic Original Base)</b></summary>
+
+![Cinema4K 3-Band Master](docs/demo/f4.png)
+</details>
+
+---
+
+#### 2. Split Comparison Showcase (Raw vs. Velvet Master F5)
 ![Cinema4K GTO Split Showcase](docs/images/cinema4k_gto_split_cinematic.png)
 
-#### 2. Model Evolution & Metric Analysis (Raw vs. F4 vs. F5 vs. F6)
+#### 3. Model Evolution & Metric Analysis (Raw vs. F4 vs. F5 vs. F6)
 Direct 4-way comparison across all Cinema4K™ modes on live-action cinema:
 ![Cinema4K GTO 4-Way Comparison](docs/images/cinema4k_gto_comparison_showcase.png)
 
