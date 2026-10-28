@@ -314,19 +314,24 @@ local function render_help()
     overlay:update()
 end
 
-local function show_tab(tab_idx)
-    current_tab = tab_idx or 1
-    if not active then
-        active = true
-        mp.enable_key_bindings("help_bindings")
+local function disable_help_keys()
+    mp.remove_key_binding("help_esc")
+    mp.remove_key_binding("help_f1")
+    mp.remove_key_binding("help_f1_low")
+    mp.remove_key_binding("help_h")
+    mp.remove_key_binding("help_H")
+    mp.remove_key_binding("help_mbtn")
+    for i = 1, 5 do
+        mp.remove_key_binding("help_tab_" .. i)
     end
-    render_help()
+    mp.remove_key_binding("help_left")
+    mp.remove_key_binding("help_right")
 end
 
 local function toggle_help()
     if active then
         active = false
-        mp.disable_key_bindings("help_bindings")
+        disable_help_keys()
         overlay.data = ""
         overlay:update()
     else
@@ -334,27 +339,35 @@ local function toggle_help()
     end
 end
 
--- Key bindings active only while help overlay is visible
-mp.set_key_bindings({
-    { "ESC", toggle_help },
-    { "f1", toggle_help },
-    { "h", toggle_help },
-    { "H", toggle_help },
-    { "1", function() show_tab(1) end },
-    { "2", function() show_tab(2) end },
-    { "3", function() show_tab(3) end },
-    { "4", function() show_tab(4) end },
-    { "5", function() show_tab(5) end },
-    { "LEFT", function()
+local function enable_help_keys()
+    mp.add_forced_key_binding("ESC", "help_esc", toggle_help)
+    mp.add_forced_key_binding("F1", "help_f1", toggle_help)
+    mp.add_forced_key_binding("f1", "help_f1_low", toggle_help)
+    mp.add_forced_key_binding("h", "help_h", toggle_help)
+    mp.add_forced_key_binding("H", "help_H", toggle_help)
+    mp.add_forced_key_binding("MBTN_LEFT", "help_mbtn", toggle_help)
+    for i = 1, 5 do
+        local tab_i = i
+        mp.add_forced_key_binding(tostring(tab_i), "help_tab_" .. tab_i, function() show_tab(tab_i) end)
+    end
+    mp.add_forced_key_binding("LEFT", "help_left", function()
         current_tab = (current_tab > 1) and (current_tab - 1) or #TABS
         render_help()
-    end },
-    { "RIGHT", function()
+    end)
+    mp.add_forced_key_binding("RIGHT", "help_right", function()
         current_tab = (current_tab < #TABS) and (current_tab + 1) or 1
         render_help()
-    end },
-    { "MBTN_LEFT", toggle_help },
-}, "help_bindings", "force")
+    end)
+end
+
+function show_tab(tab_idx)
+    current_tab = tab_idx or 1
+    if not active then
+        active = true
+        enable_help_keys()
+    end
+    render_help()
+end
 
 -- Re-render on window resize
 mp.observe_property("osd-width", "native", function()
@@ -375,5 +388,4 @@ mp.register_script_message("show-audio-sub", function() show_tab(3) end)
 mp.register_script_message("show-video", function() show_tab(4) end)
 mp.register_script_message("show-about", function() show_tab(5) end)
 
--- Ensure help bindings are strictly disabled on load
-mp.disable_key_bindings("help_bindings")
+
