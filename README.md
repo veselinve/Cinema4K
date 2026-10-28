@@ -4,7 +4,7 @@
 [![MPV Version](https://img.shields.io/badge/MPV-v0.41%2B-red.svg?logo=mpv)](https://mpv.io/)
 [![Engine](https://img.shields.io/badge/Engine-gpu--next%20%7C%20libplacebo-blue.svg)](https://code.videolan.org/videolan/libplacebo)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6.svg?logo=windows)](https://microsoft.com/windows)
-[![License](https://img.shields.io/badge/Cinema4K%20License-PolyForm%20Noncommercial-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/Cinema4K%20License-PolyForm%20Noncommercial-blue.svg)](#-license--commercial-rights)
 [![Interactive Comparison](https://img.shields.io/badge/Live%20Demo-Interactive%20Slider-00c853.svg?logo=googlechrome)](https://veselinve.github.io/Cinema4K)
 [![Shaders](https://img.shields.io/badge/Shaders-Cinema4K%E2%84%A2-orange.svg)](#-cinema4k-real-time-shaders)
 
@@ -196,9 +196,21 @@ MPV-Made-Easy/
 
 ## 🛡️ License & Commercial Rights
 
-* **Cinema4K™ Video Shaders**: Copyright (c) 2026. Licensed under the **[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/)** (see details in [LICENSE](LICENSE)).
-  * **Personal & Non-Profit Use**: 100% Free for individuals to download, use, and evaluate.
-  * **Commercial Use**: ANY commercial deployment (bundling into paid media software, video platforms, OTT streaming, hardware devices, or proprietary services) requires an express written **Commercial License Agreement** and payment of royalties. For inquiries, open an Issue/Discussion or contact the repository owner.
-* **MPV Player**: Licensed under [GPLv3 / LGPLv2.1](https://github.com/mpv-player/mpv).
+### Cinema4K™ Video Shaders Suite
+Copyright (c) 2026. All rights reserved.
+
+The **Cinema4K™** studio shaders (*Cinema4K Velvet Cinema Master*, *Cinema4K Ultra Dynamic Punch*, *Cinema4K 3-Band Master*, and *Cinema4K AI Neural*) are licensed under a **Dual Licensing Model** (see the full text in [LICENSE](./LICENSE)):
+
+* **1. Personal & Non-Commercial Use (100% Free)**:
+  * Licensed under the **[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/)**.
+  * Free for individual users, film lovers, students, and home cinema enthusiasts to download, run, and evaluate.
+* **2. Commercial Use (Strictly Prohibited Without Paid License)**:
+  * ANY commercial deployment is strictly prohibited without an express written **Commercial License Agreement** and payment of royalties.
+  * Restricted activities include: bundling into paid media software, video platforms, OTT streaming, mobile apps, IPTV hardware, set-top boxes, graphics card bundles, or commercial re-branding.
+* **3. Commercial Licensing Inquiries**:
+  * To inquire about a commercial license, OEM distribution, or enterprise integration, open an **Issue / Discussion** or contact the author via your GitHub profile.
+
+### Third-Party Bundled Software
+* **MPV Player**: Licensed separately under [GPLv3 / LGPLv2.1](https://github.com/mpv-player/mpv) (see [doc/MPV-GPL.txt](doc/MPV-GPL.txt)).
 * **Anime4K**: Developed by [bloc97](https://github.com/bloc97/Anime4K) (MIT License).
 * **ModernF OSC & Dynamic Menu**: Built with contributions from the open-source MPV community.
