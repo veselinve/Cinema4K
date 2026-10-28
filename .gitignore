@@ -23,6 +23,7 @@ test_mpv.log
 # User playback state
 watch_later/
 mpv/watch_later/
+current_file/
 
 # OS metadata
 Thumbs.db

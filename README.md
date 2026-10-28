@@ -41,13 +41,15 @@ Engineered specifically for live-action films, TV series, and real-world compres
 
 ### 📸 Visual Comparisons & Quality Showcase
 
-#### 1. Velvet Cinema Master (`F5`) vs. Dynamic Punch (`F6`) vs. Original 1080p
-Ultra-fine fabric texture extraction without halo artifacts, edge ringing, or artificial over-sharpening:
-![Cinema4K Velvet Cinema Master Comparison](docs/images/velvet_master_vs_ultra_punch.png)
+#### 1. Real-Time Cinematic Acutance (50/50 Split Showcase)
+*Source: Great Teacher Onizuka - The Movie (1999) [1080p Master].*  
+**Left:** Raw compressed 1080p stream (`F7` Bypass).  
+**Right:** **Cinema4K Velvet Cinema Master (`F5`)** — organic acutance, sub-pixel edge refinement, and film texture without haloing or artificial over-sharpening:
+![Cinema4K GTO Split Showcase](docs/images/cinema4k_gto_split_cinematic.png)
 
-#### 2. Fine Detail & Meso-Scale Texture Reconstruction
-Demonstrating micro-contrast depth, realistic film grain preservation, and facial contour refinement:
-![Cinema4K Texture Reconstruction Panel](docs/images/master_wide_comparison_4way.png)
+#### 2. Model Evolution & Metric Analysis (Raw vs. F4 vs. F5 vs. F6)
+Direct 4-way comparison across all Cinema4K™ modes on live-action cinema:
+![Cinema4K GTO 4-Way Comparison](docs/images/cinema4k_gto_comparison_showcase.png)
 
 ---
 
