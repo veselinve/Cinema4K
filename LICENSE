@@ -35,5 +35,5 @@ To obtain a commercial license, enterprise deployment rights, or OEM partnership
 ---
 
 ## 4. Third-Party Components
-* The bundled **MPV Player** is licensed separately under GNU GPLv2/GPLv3 (see [LICENSE-MPV.txt](LICENSE-MPV.txt)).
+* The bundled **MPV Player** is licensed separately under GNU GPLv2/GPLv3 (see [doc/MPV-GPL.txt](doc/MPV-GPL.txt)).
 * The bundled **Anime4K** shaders are developed by bloc97 under the MIT License.

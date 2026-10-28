@@ -4,7 +4,7 @@
 [![MPV Version](https://img.shields.io/badge/MPV-v0.41%2B-red.svg?logo=mpv)](https://mpv.io/)
 [![Engine](https://img.shields.io/badge/Engine-gpu--next%20%7C%20libplacebo-blue.svg)](https://code.videolan.org/videolan/libplacebo)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D6.svg?logo=windows)](https://microsoft.com/windows)
-[![License](https://img.shields.io/badge/Cinema4K%20License-PolyForm%20Noncommercial-blue.svg)](LICENSE.md)
+[![License](https://img.shields.io/badge/Cinema4K%20License-PolyForm%20Noncommercial-blue.svg)](LICENSE)
 [![Interactive Comparison](https://img.shields.io/badge/Live%20Demo-Interactive%20Slider-00c853.svg?logo=googlechrome)](https://veselinve.github.io/Cinema4K)
 [![Shaders](https://img.shields.io/badge/Shaders-Cinema4K%E2%84%A2-orange.svg)](#-cinema4k-real-time-shaders)
 
@@ -196,7 +196,7 @@ MPV-Made-Easy/
 
 ## 🛡️ License & Commercial Rights
 
-* **Cinema4K™ Video Shaders**: Copyright (c) 2026. Licensed under the **[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/)** (see details in [LICENSE.md](LICENSE.md)).
+* **Cinema4K™ Video Shaders**: Copyright (c) 2026. Licensed under the **[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/)** (see details in [LICENSE](LICENSE)).
   * **Personal & Non-Profit Use**: 100% Free for individuals to download, use, and evaluate.
   * **Commercial Use**: ANY commercial deployment (bundling into paid media software, video platforms, OTT streaming, hardware devices, or proprietary services) requires an express written **Commercial License Agreement** and payment of royalties. For inquiries, open an Issue/Discussion or contact the repository owner.
 * **MPV Player**: Licensed under [GPLv3 / LGPLv2.1](https://github.com/mpv-player/mpv).
