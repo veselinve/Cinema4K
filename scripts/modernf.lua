@@ -2301,6 +2301,22 @@ local function element_has_action(element, action)
         element.eventresponder[action]
 end
 
+-- Video-area single/double click handling. A single click pauses instantly;
+-- a double-click toggles fullscreen and resumes playback. The trailing second
+-- click of a double-click arrives as its own MBTN_LEFT after the DBL event
+-- (mpv defers mouse commands to button-up), so clicks shortly after a
+-- double-click are ignored.
+local bg_last_dbl = 0
+local function bg_click_pause()
+    if mp.get_time() - bg_last_dbl < 0.5 then return end
+    mp.commandv('cycle', 'pause')
+end
+local function bg_dbl_click()
+    bg_last_dbl = mp.get_time()
+    mp.commandv('cycle', 'fullscreen')
+    mp.commandv('set', 'pause', 'no')
+end
+
 function process_event(source, what)
     local action = string.format('%s%s', source,
         what and ('_' .. what) or '')
@@ -2355,7 +2371,7 @@ function process_event(source, what)
             state.bg_click = nil
             if dx < 15 and dy < 15 and dt < 0.8 then
                 if click_src == 'mbtn_left' then
-                    mp.commandv('cycle', 'pause')
+                    bg_click_pause()
                 elseif click_src == 'mbtn_right' then
                     mp.commandv('script-binding', 'dyn_menu/toggle')
                 end
@@ -2634,9 +2650,7 @@ mp.set_key_bindings({
                                 end
                                 if not hit then
                                     state.bg_click = nil
-                                    mp.commandv('cycle', 'fullscreen')
-                                    -- single click paused playback; resume it
-                                    mp.commandv('set', 'pause', 'no')
+                                    bg_dbl_click()
                                 end
                             end},
     {'mbtn_right_dbl',     function(e)
@@ -2650,6 +2664,10 @@ mp.set_key_bindings({
                             function(e) process_event('mbtn_left', 'down')  end},
 }, 'window-controls', 'force')
 mp.enable_key_bindings('window-controls')
+
+-- named bindings for input.conf: video-area single/double click
+mp.add_key_binding(nil, 'video-mbtn-left', bg_click_pause)
+mp.add_key_binding(nil, 'video-mbtn-dbl', bg_dbl_click)
 
 function get_hidetimeout()
     if user_opts.visibility == 'always' then
