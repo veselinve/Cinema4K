@@ -19,12 +19,16 @@
 --    right answer.
 -- 3. The resolved physical key is re-injected through mp.commandv("keypress").
 --
--- Safety rules (added after the mouse-move/mute bug):
---   - Mouse events (MOUSE_MOVE, MBTN_*, WHEEL_*), named keys (ESC, SPACE, F5,
---     PGUP, ...) and modifier combinations (Alt+..., Ctrl+...) are NEVER
---     translated. Only a single non-ASCII character is a translation candidate.
---     Without this, every mouse move was translated to "m" (mute toggle),
---     flooding the input queue and stuttering playback.
+-- Safety rules:
+--   - Mouse events (MOUSE_MOVE, MBTN_*, WHEEL_*) are NEVER translated, and
+--     named keys (ESC, SPACE, F5, PGUP, ...) never match (only a single
+--     non-ASCII character is a translation candidate). Without this, every
+--     mouse move was translated to "m" (mute toggle), flooding the input
+--     queue and stuttering playback.
+--   - Modifier combinations (Shift+..., Ctrl+..., Alt+...) of a single
+--     non-ASCII character ARE translated to the same physical key, so e.g.
+--     Shift+S / Ctrl+S / Alt+S typed on a Cyrillic layout work like their
+--     Latin counterparts.
 -- ==============================================================================
 
 local mp = require 'mp'
@@ -177,9 +181,30 @@ local function translate_win32(char_str)
 end
 
 -- ------------------------------------------------------------------------------
--- 2. Universal "unmapped" Single-Character Re-Injection Interceptor
+-- 3. Universal "unmapped" Single-Character Re-Injection Interceptor
 -- ------------------------------------------------------------------------------
 local in_replay = false
+
+-- Split leading Shift/Ctrl/Alt/Meta modifiers off a key name; returns the
+-- modifier list (in original order) and the remaining base name. Lua patterns
+-- have no alternation, so plain prefix comparison is used.
+local function split_modifiers(name)
+    local mods = {}
+    local base = name
+    while true do
+        local matched = false
+        for _, m in ipairs({ "Shift+", "Ctrl+", "Alt+", "Meta+" }) do
+            if base:sub(1, #m) == m then
+                mods[#mods + 1] = m:sub(1, -2)
+                base = base:sub(#m + 1)
+                matched = true
+                break
+            end
+        end
+        if not matched then break end
+    end
+    return mods, base
+end
 
 mp.add_key_binding("unmapped", "universal_unmapped_handler", function(ev)
     if in_replay then return end
@@ -191,23 +216,36 @@ mp.add_key_binding("unmapped", "universal_unmapped_handler", function(ev)
     -- Never touch mouse events (MOUSE_MOVE / MBTN_* / WHEEL_*).
     if ev.is_mouse then return end
 
-    -- Only single, non-ASCII characters are translation candidates. This
-    -- filters out named keys (ESC, SPACE, F5, PGUP, ...), mouse/wheel names
-    -- and modifier combinations (Alt+..., Ctrl+...), which must stay dead
-    -- instead of being "translated" by their first character.
-    local cp = single_char_codepoint(raw_name)
+    -- Split modifiers; the base must be exactly one non-ASCII character.
+    -- This filters out named keys (ESC, SPACE, F5, PGUP, ...) and mouse
+    -- names. Modifier combinations are translated too, so Shift+letter /
+    -- Ctrl+letter / Alt+letter work with any keyboard layout (mpv delivers
+    -- e.g. Shift+ Cyrillic keys with the SHIFT modifier attached when the
+    -- key is typed with the shift key held).
+    local mods, base = split_modifiers(raw_name)
+    local cp = single_char_codepoint(base)
     if not cp then return end
     if cp < 0x80 then return end
 
     -- Translate with the dynamic Win32 engine (active layout first)
-    local target = translate_win32(raw_name)
+    local target = translate_win32(base)
 
     -- If no target resolved or target is the same, do nothing
-    if not target or target == raw_name then return end
+    if not target or target == base then
+        msg.warn(("unmapped-skip: raw=%q target=%s"):format(raw_name, tostring(target)))
+        return
+    end
+
+    -- Rebuild the key name with the original modifiers
+    local name = target
+    for i = #mods, 1, -1 do
+        name = mods[i] .. "+" .. name
+    end
+    if name == raw_name then return end
 
     -- Re-inject resolved physical key
     in_replay = true
-    mp.commandv("keypress", target)
+    mp.commandv("keypress", name)
     in_replay = false
 end, { complex = true })
 
