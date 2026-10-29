@@ -2635,6 +2635,8 @@ mp.set_key_bindings({
                                 if not hit then
                                     state.bg_click = nil
                                     mp.commandv('cycle', 'fullscreen')
+                                    -- single click paused playback; resume it
+                                    mp.commandv('set', 'pause', 'no')
                                 end
                             end},
     {'mbtn_right_dbl',     function(e)
