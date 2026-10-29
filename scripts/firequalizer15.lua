@@ -185,7 +185,45 @@ end
 audio_reconfig()
 mp.register_event("playback-restart", audio_reconfig)
 
+-- ----------------------------------------------------------------------------
+-- Equalizer presets (selectable from the right-click menu). Gains are in
+-- tenths of dB for the 15 bands: 0, 65, 157, 288, 472, 733 Hz, 1.1k, 1.6k,
+-- 2.4k, 3.4k, 4.9k, 7k, 10k, 14k, 20k Hz.
+-- ----------------------------------------------------------------------------
+local presets = {
+    flat   = { name = "Off / Flat",               gains = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} },
+    bass   = { name = "Bass Boost",               gains = {0, 70, 60, 45, 30, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0} },
+    vocal  = { name = "Vocal / Dialogue Clarity", gains = {-40, -40, -20, 0, 10, 20, 30, 30, 25, 20, 10, 0, 0, 0, 0} },
+    treble = { name = "Treble Boost",             gains = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 40, 50, 50, 40} },
+    rock   = { name = "Dynamic (Rock / Pop)",     gains = {0, 50, 40, 20, 0, 0, 10, 20, 25, 20, 25, 35, 45, 40, 35} },
+}
+
+local function set_preset_state(name)
+    if mp.get_property("user-data/firequalizer15-preset") ~= name then
+        mp.set_property("user-data/firequalizer15-preset", name)
+    end
+end
+
+local function apply_preset(name)
+    local preset = presets[name]
+    if not preset then return end
+    for x = 0, num_entry-1 do
+        gain_table[eq(x)] = preset.gains[x + 1] or 0
+    end
+    set_preset_state(name)
+    audio_reconfig()
+    save_gain_table()
+    mp.osd_message("Graphic Equalizer: " .. preset.name, 2)
+    if control_enabled then
+        show_osd_ass()
+    end
+end
+
+mp.register_script_message("set-preset", apply_preset)
+set_preset_state(is_flat() and "flat" or "custom")
+
 local function send_command()
+    set_preset_state("custom")
     if not is_flat() and stale_gain_entry == nil then
         audio_reconfig()
     else
