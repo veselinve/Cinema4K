@@ -99,6 +99,10 @@ local fontfamily = "mono"
 local pdefault  = "{\\fn" .. fontfamily .. "\\fscx" .. fontsize .. "\\fscy" .. fontsize .. "\\1c&" .. normalcolor .. "&}"
 local pselected = "{\\fn" .. fontfamily .. "\\fscx" .. fontsize .. "\\fscy" .. fontsize .. "\\1c&" .. selectedcolor .. "&}"
 
+-- mp.set_osd_ass is non-functional on this mpv build; render the equalizer
+-- through an ass-events OSD overlay instead (same API as the other scripts).
+local eq_overlay = mp.create_osd_overlay("ass-events")
+
 local function gain_line(x)
     local val = gain_table[eq(x)] - min_val;
     local str = ""
@@ -119,11 +123,13 @@ local function show_osd_ass()
         end
         str = str .. pval .. freq_label[eq(x)] .. string.format("%7.1f", gain_table[eq(x)]*0.1) .. " dB |" .. gain_line(x) .. "\n"
     end
-    mp.set_osd_ass(0, 0, str)
+    eq_overlay.data = str
+    eq_overlay:update()
 end
 
 local function hide_osd_ass()
-    mp.set_osd_ass(0, 0, "{}")
+    eq_overlay.data = "{}"
+    eq_overlay:update()
 end
 
 local function gen_gain_entry()

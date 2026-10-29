@@ -223,6 +223,18 @@ local settings = {
 local opts = require("mp.options")
 opts.read_options(settings, "playlistmanager", function(list) update_opts(list) end)
 
+-- mp.set_osd_ass is non-functional on newer mpv builds; render the playlist
+-- through an ass-events OSD overlay instead (same API as the other scripts).
+local osd_overlay = mp.create_osd_overlay("ass-events")
+local function osd_ass_compat(w, h, text)
+  if w > 0 and h > 0 then
+    osd_overlay.res_x = w
+    osd_overlay.res_y = h
+  end
+  osd_overlay.data = text
+  osd_overlay:update()
+end
+
 local utils = require("mp.utils")
 local msg = require("mp.msg")
 local assdraw = require("mp.assdraw")
@@ -623,7 +635,7 @@ function draw_playlist()
   end
 
   if settings.scale_playlist_by_window then w,h = 0, 0 end
-  mp.set_osd_ass(w, h, ass.text)
+  osd_ass_compat(w, h, ass.text)
 end
 
 local peek_display_timer = nil
@@ -1205,7 +1217,7 @@ function remove_keybinds()
   keybindstimer:kill()
   keybindstimer = mp.add_periodic_timer(settings.playlist_display_timeout, remove_keybinds)
   keybindstimer:kill()
-  mp.set_osd_ass(0, 0, "")
+  osd_ass_compat(0, 0, "{}")
   playlist_visible = false
   if settings.reset_cursor_on_close then
     resetcursor()
