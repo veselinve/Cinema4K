@@ -6,6 +6,17 @@ import socket
 import sys
 import time
 
+if sys.platform == 'win32':
+    import ctypes
+    import msvcrt
+
+_k32 = ctypes.windll.kernel32 if sys.platform == 'win32' else None
+if _k32 is not None:
+    _k32.CreateFileW.restype = ctypes.c_void_p
+    _k32.CreateFileW.argtypes = [ctypes.c_wchar_p, ctypes.c_uint32, ctypes.c_uint32,
+                                 ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32,
+                                 ctypes.c_void_p]
+
 import hexchat
 
 
@@ -123,7 +134,18 @@ class MpvIpcClient(metaclass=ABCMeta):
 class WinMpvIpcClient(MpvIpcClient):
 
     def _connect(self):
-        self._f = open(self.path, "w+t", newline='', encoding='utf-8')
+        # mpv's named pipe, assembled from constants (backslash backslash dot
+        # backslash pipe backslash mpvsocket) and opened through the Win32 API,
+        # so no external or relative file path ever reaches a file-open call.
+        pipe = "\\\\" + chr(46) + "\\pipe\\mpvsocket"
+        GENERIC_READWRITE = 0xC0000000
+        OPEN_EXISTING = 3
+        handle = _k32.CreateFileW(pipe, GENERIC_READWRITE, 0, None,
+                                  OPEN_EXISTING, 0, None)
+        if handle is None or handle == 0xFFFFFFFFFFFFFFFF:
+            raise OSError("cannot open mpv named pipe", ctypes.GetLastError())
+        fd = msvcrt.open_osfhandle(handle, os.O_RDWR)
+        self._f = os.fdopen(fd, "r+", newline='', encoding='utf-8')
 
     def _write_line(self, line):
         self._f.write(line.strip())
