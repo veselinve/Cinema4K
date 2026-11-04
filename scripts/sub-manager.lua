@@ -19,7 +19,10 @@ local FONTS = {
     { name = "Consolas", font = "Consolas" },
     { name = "Impact", font = "Impact" },
     { name = "Times New Roman", font = "Times New Roman" },
-    { name = "Comic Sans MS", font = "Comic Sans MS" }
+    { name = "Comic Sans MS", font = "Comic Sans MS" },
+    { name = "Yu Gothic (Japanese)", font = "Yu Gothic" },
+    { name = "Meiryo (Japanese)", font = "Meiryo" },
+    { name = "Microsoft YaHei (Chinese)", font = "Microsoft YaHei" }
 }
 
 local SIZES = {
@@ -30,6 +33,154 @@ local SIZES = {
     { label = "60 (Extra Large)", size = 60, scale = 1.15 },
     { label = "72 (Huge)", size = 72, scale = 1.40 }
 }
+
+-- ---------------------------------------------------------------------------
+-- Per-script subtitle styling (Latin / Cyrillic / Japanese / Chinese).
+-- Each writing system keeps its own font and size, persisted across
+-- sessions, and is applied automatically when the active subtitle's script
+-- changes. Only scripts the user has explicitly styled are forced;
+-- embedded ASS styling stays untouched otherwise.
+-- ---------------------------------------------------------------------------
+local SCRIPT_LABELS = {
+    latin    = "Latin",
+    cyrillic = "Cyrillic",
+    japanese = "Japanese",
+    chinese  = "Chinese",
+}
+local style = {
+    latin    = { font = "Source Sans Variable Roman", size = 52, active = false },
+    cyrillic = { font = "Source Sans Variable Roman", size = 52, active = false },
+    japanese = { font = "Yu Gothic",                  size = 52, active = false },
+    chinese  = { font = "Microsoft YaHei",            size = 52, active = false },
+}
+local current_script = nil
+
+local function script_opts_dir()
+    local dir = mp.find_config_file("script-opts")
+    if not dir or dir == "" then
+        dir = mp.command_native({ "expand-path", "~~/script-opts" })
+    end
+    return dir
+end
+
+local function save_style()
+    local dir = script_opts_dir()
+    if not dir or dir == "" then return end
+    local fp = io.open(dir .. "/sub-manager-style.conf", "w")
+    if not fp then return end
+    for name, s in pairs(style) do
+        fp:write(string.format("%s_font=%s\n", name, s.font))
+        fp:write(string.format("%s_size=%d\n", name, s.size))
+        fp:write(string.format("%s_active=%s\n", name, tostring(s.active)))
+    end
+    fp:close()
+end
+
+local function load_style()
+    local dir = script_opts_dir()
+    if not dir or dir == "" then return end
+    local fp = io.open(dir .. "/sub-manager-style.conf", "r")
+    if not fp then return end
+    for line in fp:lines() do
+        local key, value = line:match("^([%w_]+)=(.*)$")
+        if key and value ~= "" then
+            local script, field = key:match("^(%w+)_(font|size|active)$")
+            if script and style[script] then
+                if field == "font" then
+                    style[script].font = value
+                elseif field == "size" then
+                    style[script].size = tonumber(value) or 52
+                elseif field == "active" then
+                    style[script].active = (value == "true")
+                end
+            end
+        end
+    end
+    fp:close()
+end
+
+-- iterate the unicode codepoints of a UTF-8 string
+local function utf8_codepoints(s)
+    local i = 1
+    return function()
+        if i > #s then return nil end
+        local b1 = s:byte(i)
+        local base, len
+        if b1 < 0x80 then base, len = b1, 1
+        elseif b1 >= 0xC2 and b1 <= 0xDF then base, len = (b1 - 0xC0) * 64, 2
+        elseif b1 >= 0xE0 and b1 <= 0xEF then base, len = (b1 - 0xE0) * 4096, 3
+        elseif b1 >= 0xF0 and b1 <= 0xF4 then base, len = (b1 - 0xF0) * 262144, 4
+        else i = i + 1; return nil end
+        local acc = base
+        for j = 1, len - 1 do
+            local b = s:byte(i + j)
+            if not b or b < 0x80 or b >= 0xC0 then i = i + len; return nil end
+            acc = acc + (b - 0x80) * (2 ^ ((len - 1 - j) * 6))
+        end
+        i = i + len
+        return acc
+    end
+end
+
+-- classify the writing system of a subtitle line
+local function detect_script(text)
+    if not text or text == "" then return nil end
+    local has_cjk, has_cyr, has_latin = false, false, false
+    for cp in utf8_codepoints(text) do
+        if cp == nil then break end
+        -- kana means the line is Japanese regardless of kanji
+        if (cp >= 0x3040 and cp <= 0x30FF) or (cp >= 0x31F0 and cp <= 0x31FF)
+            or (cp >= 0xFF66 and cp <= 0xFF9D) then
+            return "japanese"
+        elseif cp >= 0x4E00 and cp <= 0x9FFF then
+            has_cjk = true
+        elseif cp >= 0x0400 and cp <= 0x04FF then
+            has_cyr = true
+        elseif (cp >= 0x41 and cp <= 0x5A) or (cp >= 0x61 and cp <= 0x7A) then
+            has_latin = true
+        end
+    end
+    if has_cjk then return "chinese" end
+    if has_cyr then return "cyrillic" end
+    if has_latin then return "latin" end
+    return nil
+end
+
+local function apply_script_style(script, quiet)
+    local s = style[script]
+    if not s then return end
+    mp.set_property("sub-font", s.font)
+    mp.set_property_number("sub-font-size", s.size)
+    mp.set_property_number("sub-scale", s.size / 52)
+    mp.set_property("sub-ass-override", "force")
+    pcall(function() mp.set_property("secondary-sub-ass-override", "force") end)
+    if not quiet then
+        mp.osd_message(string.format("Subtitle Style [%s]: %s @ %dpx",
+            SCRIPT_LABELS[script] or script, s.font, s.size), 2)
+    end
+    if active_mode then render_ui() end
+end
+
+local function current_script_name()
+    return current_script or "latin"
+end
+
+local function set_font_current(font)
+    local sc = current_script_name()
+    style[sc].font = font
+    style[sc].active = true
+    save_style()
+    apply_script_style(sc)
+end
+
+local function set_size_current(size)
+    local sc = current_script_name()
+    size = math.max(20, math.min(100, math.floor(size + 0.5)))
+    style[sc].size = size
+    style[sc].active = true
+    save_style()
+    apply_script_style(sc)
+end
 
 local POSITION_MODES = {
     {
@@ -174,32 +325,22 @@ local function swap_subtitles()
 end
 
 local function adjust_sub_size(delta)
-    local cur_scale = tonumber(mp.get_property("sub-scale")) or 1.0
-    local cur_size = tonumber(mp.get_property("sub-font-size")) or 52
-
-    local new_scale = math.max(0.4, math.min(3.0, cur_scale + delta * 0.1))
-    new_scale = math.floor(new_scale * 10 + 0.5) / 10
-
-    local new_size = math.max(20, math.min(100, math.floor(cur_size + delta * 4 + 0.5)))
-
-    mp.set_property_number("sub-scale", new_scale)
-    mp.set_property_number("sub-font-size", new_size)
-    mp.set_property("sub-ass-override", "force")
-    pcall(function() mp.set_property("secondary-sub-ass-override", "force") end)
-
-    local percent = math.floor(new_scale * 100 + 0.5)
-    mp.osd_message(string.format("Subtitle Size: %d%% (%d px)", percent, new_size), 2)
+    local sc = current_script_name()
+    local new_size = math.max(20, math.min(100, style[sc].size + delta * 4))
+    style[sc].size = new_size
+    style[sc].active = true
+    save_style()
+    apply_script_style(sc, true)
+    local percent = math.floor(new_size / 52 * 100 + 0.5)
+    mp.osd_message(string.format("Subtitle Size [%s]: %d%% (%d px)",
+        SCRIPT_LABELS[sc] or sc, percent, new_size), 2)
     if active_mode == 'size' then render_ui() end
 end
 
 local function apply_size_preset(idx)
     local item = SIZES[idx]
     if not item then return end
-    mp.set_property_number("sub-font-size", item.size)
-    mp.set_property_number("sub-scale", item.scale)
-    mp.set_property("sub-ass-override", "force")
-    pcall(function() mp.set_property("secondary-sub-ass-override", "force") end)
-    mp.osd_message(string.format("Subtitle Size: %s", item.label), 2)
+    set_size_current(item.size)
     if active_mode == 'size' then render_ui() end
     close_overlay()
 end
@@ -304,13 +445,14 @@ function render_ui()
         end
 
     elseif active_mode == 'font' then
-        local cur_font = mp.get_property("sub-font") or "Source Sans Variable Roman"
-        a(string.format("{\\pos(%d,%d)\\an7\\fnSource Sans Pro,Arial,sans-serif\\fs13\\1c&HFBBF24&\\b1}Press [ 1 ] - [ %d ] to apply font to subtitles (Forces override for ASS):{\\b0}",
-            x0 + 40, content_y, #FONTS))
+        local sc = current_script_name()
+        local cur_font = style[sc].font
+        a(string.format("{\\pos(%d,%d)\\an7\\fnSource Sans Pro,Arial,sans-serif\\fs13\\1c&HFBBF24&\\b1}Font for [%s] subtitles — pick [ 1 ] - [ %d ] (forced for ASS):{\\b0}",
+            x0 + 40, content_y, SCRIPT_LABELS[sc] or sc, #FONTS))
         content_y = content_y + 24
 
         for idx, item in ipairs(FONTS) do
-            local is_cur = (cur_font:lower():find(item.font:lower()) ~= nil)
+            local is_cur = (cur_font:lower():find(item.font:lower(), 1, true) ~= nil)
             local marker = is_cur and "  {\\1c&H38BDF8&\\b1}[✓ Current Font]{\\b0}" or ""
             local col = is_cur and "&H38BDF8&" or "&HE2E8F0&"
 
@@ -320,11 +462,11 @@ function render_ui()
         end
 
     elseif active_mode == 'size' then
-        local cur_size = tonumber(mp.get_property("sub-font-size")) or 52
-        local cur_scale = tonumber(mp.get_property("sub-scale")) or 1.0
-        local percent = math.floor(cur_scale * 100 + 0.5)
-        a(string.format("{\\pos(%d,%d)\\an7\\fnSource Sans Pro,Arial,sans-serif\\fs13\\1c&HFBBF24&\\b1}Press [ 1 ] - [ %d ] to choose size, or [ + ] / [ - ] / [ Up / Down ] to scale (Current: %d%% / %dpx):{\\b0}",
-            x0 + 40, content_y, #SIZES, percent, cur_size))
+        local sc = current_script_name()
+        local cur_size = style[sc].size
+        local percent = math.floor(cur_size / 52 * 100 + 0.5)
+        a(string.format("{\\pos(%d,%d)\\an7\\fnSource Sans Pro,Arial,sans-serif\\fs13\\1c&HFBBF24&\\b1}Size for [%s] subtitles — pick [ 1 ] - [ %d ], [ + ] / [ - ] to scale (Current: %d%% / %dpx):{\\b0}",
+            x0 + 40, content_y, SCRIPT_LABELS[sc] or sc, #SIZES, percent, cur_size))
         content_y = content_y + 24
 
         for idx, item in ipairs(SIZES) do
@@ -359,9 +501,7 @@ local function handle_dialog_num_key(num)
         end
     elseif active_mode == 'font' then
         if FONTS[num] then
-            mp.set_property("sub-font", FONTS[num].font)
-            mp.set_property("sub-ass-override", "force")
-            mp.osd_message("Subtitle Font: " .. FONTS[num].name, 2)
+            set_font_current(FONTS[num].font)
             close_overlay()
         end
     elseif active_mode == 'size' then
@@ -494,8 +634,30 @@ mp.register_script_message("toggle-sub-visibility", toggle_sub_visibility)
 mp.register_script_message("size-up", function() adjust_sub_size(1) end)
 mp.register_script_message("size-down", function() adjust_sub_size(-1) end)
 mp.register_script_message("size-reset", function()
-    mp.set_property_number("sub-scale", 1.0)
-    mp.set_property_number("sub-font-size", 52)
+    set_size_current(52)
     mp.osd_message("Subtitle Size: Reset to 100% (52 px)", 2)
     if active_mode == 'size' then render_ui() end
+end)
+
+mp.register_script_message("set-font", function(font)
+    if font and font ~= "" then set_font_current(font) end
+end)
+
+mp.register_script_message("set-size", function(size)
+    local n = tonumber(size)
+    if n then set_size_current(n) end
+end)
+
+load_style()
+
+-- detect the writing system of the active subtitle and apply the style
+-- saved for it (only when the user has styled that script)
+mp.observe_property("sub-text", "native", function(_, text)
+    local sc = detect_script(text)
+    if sc and sc ~= current_script then
+        current_script = sc
+        if style[sc].active then
+            apply_script_style(sc, true)
+        end
+    end
 end)
