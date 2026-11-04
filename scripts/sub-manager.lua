@@ -648,6 +648,19 @@ mp.register_script_message("set-size", function(size)
     if n then set_size_current(n) end
 end)
 
+mp.register_script_message("reset-style", function()
+    local sc = current_script_name()
+    style[sc].active = false
+    save_style()
+    -- back to mpv's default: the subtitle renders with its original embedded
+    -- font and styling (sub-font/size choices are ignored until re-applied)
+    mp.set_property("sub-ass-override", "yes")
+    pcall(function() mp.set_property("secondary-sub-ass-override", "yes") end)
+    mp.osd_message(string.format("Subtitle Style [%s]: original embedded font restored",
+        SCRIPT_LABELS[sc] or sc), 2)
+    if active_mode then render_ui() end
+end)
+
 load_style()
 
 -- detect the writing system of the active subtitle and apply the style
