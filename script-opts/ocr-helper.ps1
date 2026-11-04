@@ -1,8 +1,9 @@
-param(
+﻿param(
     [string]$Image = "",
     [string]$Lang = "",
     [string]$Mode = "once"
 )
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 Add-Type -AssemblyName System.Runtime.WindowsRuntime | Out-Null
 Add-Type -AssemblyName System.Drawing | Out-Null
 
