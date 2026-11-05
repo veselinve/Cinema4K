@@ -48,10 +48,10 @@ local SCRIPT_LABELS = {
     chinese  = "Chinese",
 }
 local style = {
-    latin    = { font = "Source Sans Variable Roman", size = 52, active = false },
-    cyrillic = { font = "Source Sans Variable Roman", size = 52, active = false },
-    japanese = { font = "Yu Gothic",                  size = 52, active = false },
-    chinese  = { font = "Microsoft YaHei",            size = 52, active = false },
+    latin    = { font = "", size = 52, font_active = false },
+    cyrillic = { font = "", size = 52, font_active = false },
+    japanese = { font = "Yu Gothic",                  size = 52, font_active = false },
+    chinese  = { font = "Microsoft YaHei",            size = 52, font_active = false },
 }
 local current_script = nil
 
@@ -71,7 +71,7 @@ local function save_style()
     for name, s in pairs(style) do
         fp:write(string.format("%s_font=%s\n", name, s.font))
         fp:write(string.format("%s_size=%d\n", name, s.size))
-        fp:write(string.format("%s_active=%s\n", name, tostring(s.active)))
+        fp:write(string.format("%s_active=%s\n", name, tostring(s.font_active)))
     end
     fp:close()
 end
@@ -84,14 +84,14 @@ local function load_style()
     for line in fp:lines() do
         local key, value = line:match("^([%w_]+)=(.*)$")
         if key and value ~= "" then
-            local script, field = key:match("^(%w+)_(font|size|active)$")
+            local script, field = key:match("^(%w+)_(font|size|font_active)$")
             if script and style[script] then
                 if field == "font" then
                     style[script].font = value
                 elseif field == "size" then
                     style[script].size = tonumber(value) or 52
-                elseif field == "active" then
-                    style[script].active = (value == "true")
+                elseif field == "font_active" then
+                    style[script].font_active = (value == "true")
                 end
             end
         end
@@ -152,11 +152,22 @@ local function apply_script_style(script, quiet)
     mp.set_property("sub-font", s.font)
     mp.set_property_number("sub-font-size", s.size)
     mp.set_property_number("sub-scale", s.size / 52)
-    mp.set_property("sub-ass-override", "force")
-    pcall(function() mp.set_property("secondary-sub-ass-override", "force") end)
+    if s.font_active and s.font ~= "" then
+        mp.set_property("sub-font", s.font)
+        mp.set_property("sub-ass-override", "force")
+        pcall(function() mp.set_property("secondary-sub-ass-override", "force") end)
+    else
+        -- original embedded font; only the size is applied
+        mp.set_property("sub-ass-override", "scale")
+        pcall(function() mp.set_property("secondary-sub-ass-override", "scale") end)
+    end
+    mp.set_property("user-data/sub-style/font", s.font_active and s.font or "original")
+    mp.set_property("user-data/sub-style/size", tostring(s.size))
+    mp.set_property("user-data/sub-style/script", SCRIPT_LABELS[script] or script)
     if not quiet then
+        local label = s.font_active and s.font or "Original font"
         mp.osd_message(string.format("Subtitle Style [%s]: %s @ %dpx",
-            SCRIPT_LABELS[script] or script, s.font, s.size), 2)
+            SCRIPT_LABELS[script] or script, label, s.size), 2)
     end
     if active_mode then render_ui() end
 end
@@ -168,7 +179,7 @@ end
 local function set_font_current(font)
     local sc = current_script_name()
     style[sc].font = font
-    style[sc].active = true
+    style[sc].font_active = true
     save_style()
     apply_script_style(sc)
 end
@@ -177,7 +188,7 @@ local function set_size_current(size)
     local sc = current_script_name()
     size = math.max(20, math.min(100, math.floor(size + 0.5)))
     style[sc].size = size
-    style[sc].active = true
+    style[sc].font_active = true
     save_style()
     apply_script_style(sc)
 end
@@ -328,7 +339,7 @@ local function adjust_sub_size(delta)
     local sc = current_script_name()
     local new_size = math.max(20, math.min(100, style[sc].size + delta * 4))
     style[sc].size = new_size
-    style[sc].active = true
+    style[sc].font_active = true
     save_style()
     apply_script_style(sc, true)
     local percent = math.floor(new_size / 52 * 100 + 0.5)
@@ -446,7 +457,7 @@ function render_ui()
 
     elseif active_mode == 'font' then
         local sc = current_script_name()
-        local cur_font = style[sc].font
+        local cur_font = (style[sc].font ~= "" and style[sc].font) or "Original (embedded)"
         a(string.format("{\\pos(%d,%d)\\an7\\fnSource Sans Pro,Arial,sans-serif\\fs13\\1c&HFBBF24&\\b1}Font for [%s] subtitles — pick [ 1 ] - [ %d ] (forced for ASS):{\\b0}",
             x0 + 40, content_y, SCRIPT_LABELS[sc] or sc, #FONTS))
         content_y = content_y + 24
@@ -650,7 +661,8 @@ end)
 
 mp.register_script_message("reset-style", function()
     local sc = current_script_name()
-    style[sc].active = false
+    style[sc].font = ""
+    style[sc].font_active = false
     save_style()
     -- back to mpv's default: the subtitle renders with its original embedded
     -- font and styling (sub-font/size choices are ignored until re-applied)
