@@ -149,7 +149,6 @@ end
 local function apply_script_style(script, quiet)
     local s = style[script]
     if not s then return end
-    mp.set_property("sub-font", s.font)
     mp.set_property_number("sub-font-size", s.size)
     mp.set_property_number("sub-scale", s.size / 52)
     if s.font_active and s.font ~= "" then
@@ -176,6 +175,25 @@ local function current_script_name()
     return current_script or "latin"
 end
 
+local function apply_size_only(script, quiet)
+    -- resizing NEVER changes the font: the original embedded font (or the
+    -- explicitly chosen one) is kept, only the scale follows the size
+    local s = style[script]
+    if not s then return end
+    mp.set_property_number("sub-font-size", s.size)
+    mp.set_property_number("sub-scale", s.size / 52)
+    mp.set_property("sub-ass-override", "scale")
+    pcall(function() mp.set_property("secondary-sub-ass-override", "scale") end)
+    mp.set_property("user-data/sub-style/size", tostring(s.size))
+    mp.set_property("user-data/sub-style/script", SCRIPT_LABELS[script] or script)
+    if not quiet then
+        local percent = math.floor(s.size / 52 * 100 + 0.5)
+        mp.osd_message(string.format("Subtitle Size [%s]: %d%% (%d px)",
+            SCRIPT_LABELS[script] or script, percent, s.size), 2)
+    end
+    if active_mode then render_ui() end
+end
+
 local function set_font_current(font)
     local sc = current_script_name()
     style[sc].font = font
@@ -188,9 +206,8 @@ local function set_size_current(size)
     local sc = current_script_name()
     size = math.max(20, math.min(100, math.floor(size + 0.5)))
     style[sc].size = size
-    style[sc].font_active = true
     save_style()
-    apply_script_style(sc)
+    apply_size_only(sc)
 end
 
 local POSITION_MODES = {
@@ -339,9 +356,8 @@ local function adjust_sub_size(delta)
     local sc = current_script_name()
     local new_size = math.max(20, math.min(100, style[sc].size + delta * 4))
     style[sc].size = new_size
-    style[sc].font_active = true
     save_style()
-    apply_script_style(sc, true)
+    apply_size_only(sc, true)
     local percent = math.floor(new_size / 52 * 100 + 0.5)
     mp.osd_message(string.format("Subtitle Size [%s]: %d%% (%d px)",
         SCRIPT_LABELS[sc] or sc, percent, new_size), 2)
@@ -645,7 +661,10 @@ mp.register_script_message("toggle-sub-visibility", toggle_sub_visibility)
 mp.register_script_message("size-up", function() adjust_sub_size(1) end)
 mp.register_script_message("size-down", function() adjust_sub_size(-1) end)
 mp.register_script_message("size-reset", function()
-    set_size_current(52)
+    local sc = current_script_name()
+    style[sc].size = 52
+    save_style()
+    apply_size_only(sc)
     mp.osd_message("Subtitle Size: Reset to 100% (52 px)", 2)
     if active_mode == 'size' then render_ui() end
 end)
