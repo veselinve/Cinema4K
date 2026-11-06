@@ -14,6 +14,7 @@ local opt = require 'mp.options'
 local o = {
     band = 24,          -- percent of frame height used as the subtitle band
     force = "no",       -- yes: OCR even text subtitle tracks (debugging)
+    enabled = "no",     -- yes: OCR display on by default (menu toggles it)
 }
 opt.read_options(o)
 
@@ -51,7 +52,7 @@ local LANG_MAP = {
 }
 
 local state = {
-    user_off = false,
+    user_off = (o.enabled ~= "yes"),
     busy = false,
     seq = 0,
     last_hash = nil,
@@ -221,6 +222,13 @@ local function run_ocr(bmp, lang)
             text = result.stdout:match("OCR_TEXT:(.*)") or ""
             text = text:gsub("\r", ""):gsub("%s+$", "")
         end
+        -- CJK scripts need no spaces between glyphs; the OCR emits one
+        -- glyph per line for them
+        if lang == "ja" or lang:match("^zh") then
+            text = text:gsub("%s+", "")
+        else
+            text = text:gsub("%s+", " ")
+        end
         if text == "" then
             if state.last_hash == hash then
                 clear_overlay()
@@ -251,15 +259,32 @@ local function schedule_ocr(delay)
     mp.add_timeout(math.max(0.02, delay / 1000), ocr_current)
 end
 
+local function save_enabled()
+    local dir = mp.find_config_file("script-opts")
+    if not dir or dir == "" then return end
+    local fp = io.open(dir .. "/ocr_sub.conf", "w")
+    if not fp then return end
+    fp:write("enabled=")
+    fp:write(state.user_off and "no" or "yes")
+    fp:write("\n")
+    fp:write("band=")
+    fp:write(tostring(o.band))
+    fp:write("\n")
+    fp:close()
+end
+
 local function toggle()
     state.user_off = not state.user_off
+    save_enabled()
+    mp.set_property("user-data/ocr-sub/enabled", state.user_off and "no" or "yes")
     if state.user_off then
         clear_overlay()
         mp.osd_message("Bitmap Subtitle OCR: OFF", 2)
     else
-        mp.osd_message("Bitmap Subtitle OCR: AUTO", 2)
+        mp.osd_message("Bitmap Subtitle OCR: ON (bitmap tracks only)", 2)
         schedule_ocr(60)
     end
+    update_poll()
 end
 
 mp.register_script_message("toggle", toggle)
@@ -307,7 +332,8 @@ mp.register_event("shutdown", function()
     clear_overlay()
 end)
 
+mp.set_property("user-data/ocr-sub/enabled", state.user_off and "no" or "yes")
 update_poll()
-msg.info("Bitmap subtitle OCR ready (Windows OCR engine)")
+msg.info("Bitmap subtitle OCR ready (Windows OCR engine, default " .. (state.user_off and "OFF" or "ON") .. ")")
 
-msg.info("Bitmap subtitle OCR ready (Windows OCR engine)")
+
