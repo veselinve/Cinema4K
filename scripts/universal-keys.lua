@@ -181,6 +181,16 @@ local function translate_win32(char_str)
 end
 
 -- ------------------------------------------------------------------------------
+-- 2b. ESC: exiting fullscreen pauses playback (windowed ESC stays a no-op)
+-- ------------------------------------------------------------------------------
+mp.add_key_binding(nil, "esc-fs-pause", function()
+    if mp.get_property_bool("fullscreen") then
+        mp.set_property_bool("fullscreen", false)
+        mp.set_property_bool("pause", true)
+    end
+end)
+
+-- ------------------------------------------------------------------------------
 -- 3. Universal "unmapped" Single-Character Re-Injection Interceptor
 -- ------------------------------------------------------------------------------
 local in_replay = false
